@@ -112,7 +112,7 @@ Please record password for use later in this setup
 and save in your password manager."
 ```
 
-## Nginx and PHP Modifications
+## Apache and PHP Modifications
 **PHP Versions and Modules**
 
 Install the latest PHP version 8 and common modules.
@@ -149,7 +149,7 @@ EOF
 
 Enable the mod_headers
 ```
-a2enmod headers
+a2enmod headers && service apache2 restart
 ```
 
 Instruct browsers to allow cacheable content to be fetched from the browser’s cache for up to a week
@@ -161,3 +161,223 @@ ExpiresDefault "access plus 1 week"
 </IfModule>
 EOF
 ```
+
+Enable mod_expires
+```
+a2enmod expires && service apache2 restart
+```
+
+Allow output from your server to be compressed before being sent to the browser
+```
+cat > /etc/apache2/mods-available/deflate.conf <<EOF
+<IfModule mod_deflate.c>
+<IfModule mod_filter.c>
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+AddOutputFilterByType DEFLATE application/x-font
+AddOutputFilterByType DEFLATE application/x-font-opentype
+AddOutputFilterByType DEFLATE application/x-font-otf
+AddOutputFilterByType DEFLATE application/x-font-truetype
+AddOutputFilterByType DEFLATE application/x-font-ttf
+AddOutputFilterByType DEFLATE application/x-javascript
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE font/opentype
+AddOutputFilterByType DEFLATE font/otf
+AddOutputFilterByType DEFLATE font/ttf
+AddOutputFilterByType DEFLATE image/svg+xml
+AddOutputFilterByType DEFLATE image/x-icon
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/javascript
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/xml
+</IfModule>
+</IfModule>
+EOF
+```
+
+Enable mod_deflate
+```
+a2enmod deflate && service apache2 restart
+```
+
+Harden SSL
+```
+cp /etc/apache2/mods-available/ssl.conf /etc/apache2/mods-available/ssl.conf.save
+cat > /etc/apache2/mods-available/ssl.conf <<EOF
+<IfModule mod_ssl.c>
+SSLRandomSeed startup builtin
+SSLRandomSeed startup file:/dev/urandom 512
+SSLRandomSeed connect builtin
+SSLRandomSeed connect file:/dev/urandom 512
+AddType application/x-x509-ca-cert .crt
+AddType application/x-pkcs7-crl .crl
+SSLPassPhraseDialog exec:/usr/share/apache2/ask-for-passphrase
+SSLSessionCache         shmcb:${APACHE_RUN_DIR}/ssl_scache(512000)
+SSLSessionCacheTimeout  300
+SSLProtocol -All +TLSv1.2 +TLSv1.3
+SSLCipherSuite ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES128:ECDH+AES:!aNULL:!SHA1:!AESCCM
+SSLCipherSuite TLSv1.3 TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+SSLHonorCipherOrder On
+SSLOpenSSLConfCmd DHParameters "/etc/ssl/dhparam.pem"
+SSLUseStapling on
+SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+EOF
+```
+
+Remove any errant SSL settings
+```
+sed -i '/SSLProtocol/D' /etc/apache2/apache2.conf && sed -i '/SSLCipherSuite/D' /etc/apache2/apache2.conf
+```
+
+Restart Apache
+```
+service apache2 restart
+```
+
+## Virtualmin Post-Installation Wizard
+From a web browser, log in to the Virtualmin console at port 10000, using the root user credentials, and complete the Post-Installation Wizard. For the initial setup, you should use the server's IP address in the URL instead of FQDN (https://x.x.x.x:10000)
+
+During the setup wizard, you will be prompted for the MySQL root password created earlier in this guide. 
+
+At the end of the Wizard, select the option to **Manage Enabled Features and Plugins**. These are the only features that should be enabled:
+- Nginx website
+- Nginx SSL website
+- MySQL database
+- Log file rotation
+
+Next, select **System Settings** on the left menu, then click on **Re-check Configuration**.
+
+## Final Tweaks
+
+**Disable Unnecessary Services**
+
+If you plan to host DNS elsewhere, disable Bind DNS
+```
+systemctl mask bind9
+```
+
+If you plan to host email elsewhere, disable Dovecot Mail Server
+```
+systemctl mask dovecot
+```
+
+Disable Proftp server (I strongly encourage the use of ssh-based sftp instead of ftp/ftps)
+```
+systemctl mask proftpd
+```
+
+**Harden Email Encryption**
+
+Create Diffie-Hellman Key Pairs
+```
+openssl dhparam -out /etc/ssl/dhparam.pem 2048
+```
+
+Create Initial Self-Signed Postfix Cert
+```
+touch ~/.rnd
+openssl req -new -x509 -nodes -out /etc/ssl/postfix.pem -keyout /etc/ssl/postfix.key -days 3650 -subj "/C=US/O=$HOSTNAME/OU=Email/CN=$HOSTNAME"
+```
+
+Configure Email SSL/TLS
+```
+postconf -e tls_medium_cipherlist=ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES128:ECDH+AES:DHE+AES128:DHE+AES:RSA+AESGCM+AES128:RSA+AESGCM:\!aNULL:\!SHA1:\!DSS
+postconf -e tls_preempt_cipherlist=yes
+postconf -e smtpd_use_tls=yes
+postconf -e smtpd_tls_loglevel=1
+postconf -e smtpd_tls_security_level=may
+postconf -e smtpd_tls_auth_only=yes
+postconf -e smtpd_tls_protocols=\!SSLv2,\!SSLv3,\!TLSv1,\!TLSv1.1
+postconf -e smtpd_tls_ciphers=medium
+postconf -e smtpd_tls_mandatory_protocols=\!SSLv2,\!SSLv3,\!TLSv1,\!TLSv1.1
+postconf -e smtpd_tls_mandatory_ciphers=medium
+postconf -e smtpd_tls_cert_file=/etc/ssl/postfix.pem
+postconf -e smtpd_tls_key_file=/etc/ssl/postfix.key
+postconf -e smtpd_tls_dh1024_param_file=/etc/ssl/dhparam.pem
+postconf -e smtp_use_tls=yes
+postconf -e smtp_tls_loglevel=1
+postconf -e smtp_tls_security_level=may
+postconf -e smtp_tls_protocols=\!SSLv2,\!SSLv3,\!TLSv1,\!TLSv1.1
+postconf -e smtp_tls_ciphers=medium
+postconf -e smtp_tls_mandatory_protocols=\!SSLv2,\!SSLv3,\!TLSv1,\!TLSv1.1
+postconf -e smtp_tls_mandatory_ciphers=medium
+postconf -e smtp_tls_cert_file=/etc/ssl/postfix.pem
+postconf -e smtp_tls_key_file=/etc/ssl/postfix.key
+systemctl restart postfix
+```
+
+Restrict Mail protocols
+
+Since we are not using the Virtualmin’s mail services, then let’s lock down the Postfix SMTP server so it cannot be an attack target. We cannot disable it completely as it will be needed to send outbound email from your server. We configure it so connections are only accepted from the server itself.
+```
+postconf -e inet_interfaces=127.0.0.1
+systemctl restart postfix
+```
+
+## Setup Default Apache Site to Block IP URL Requests
+
+```
+a2dissite 000-default
+```
+```
+openssl req -new -x509 -nodes -out /etc/ssl/snakeoil.pem -keyout /etc/ssl/snakeoil.key -days 3650 -subj '/CN=*'
+```
+```
+VirtualHost1=""
+VirtualHost2=""
+ServerName="ServerName"
+ServerAlias="ServerAlias"
+AliasFlag=0
+for i in `hostname -I`
+do
+VirtualHost1="$VirtualHost1 $i:80"
+VirtualHost2="$VirtualHost2 $i:443"
+if [ $AliasFlag = 0 ] ; then
+ServerName="$ServerName $i"
+AliasFlag=1
+else
+ServerAlias="$ServerAlias $i"
+AliasFlag=2
+fi
+done
+if [ $AliasFlag = 1 ] ; then
+ServerAlias=""
+fi
+cat > /etc/apache2/sites-available/000-default.conf << EOF
+<VirtualHost $VirtualHost1>
+$ServerName
+$ServerAlias
+DocumentRoot /var/www/html/
+RedirectMatch 400 /(.*)\$
+ErrorLog /var/log/apache2/default_error_log
+CustomLog /var/log/apache2/default_access_log combined
+</VirtualHost>
+<VirtualHost $VirtualHost2>
+$ServerName
+$ServerAlias
+DocumentRoot /var/www/html/
+RedirectMatch 400 /(.*)\$
+ErrorLog /var/log/apache2/default_error_log
+CustomLog /var/log/apache2/default_access_log combined
+SSLEngine on
+SSLCertificateFile /etc/ssl/snakeoil.pem
+SSLCertificateKeyFile /etc/ssl/snakeoil.key
+SSLCACertificateFile /etc/ssl/snakeoil.pem
+</VirtualHost>
+EOF
+```
+```
+a2ensite 000-default && service apache2 restart
+```
+
+## Finished – Reboot
+This concludes the initial setup and configuration of you Virtualmin LAMP Server. Before creating your virtual webservers, reboot your server to make sure everything starts up correctly.
+```
+reboot
+```
+
