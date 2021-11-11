@@ -66,7 +66,7 @@ echo "datadir = /home/mysql" >> /etc/mysql/mysql.conf.d/mysqld.cnf
 **Update AppArmor**
 ```
 echo "alias /var/lib/mysql/ -> /home/mysql/," >> /etc/apparmor.d/tunables/alias
-service apparmor restart
+systemctl restart apparmor
 ```
 
 **Initialize New Data Directory** *(don’t worry, we will add a password during the Virtualmin setup later)*
@@ -145,7 +145,7 @@ Header set X-Content-Type-Options nosniff
 EOF
 ```
 ```
-a2enmod headers && service apache2 restart
+a2enmod headers && systemctl reload apache2
 ```
 
 **Define browser caching**
@@ -158,7 +158,7 @@ ExpiresDefault "access plus 1 week"
 EOF
 ```
 ```
-a2enmod expires && service apache2 restart
+a2enmod expires && systemctl reload apache2
 ```
 
 **Enable Compression**
@@ -192,7 +192,7 @@ AddOutputFilterByType DEFLATE text/xml
 EOF
 ```
 ```
-a2enmod deflate && service apache2 restart
+a2enmod deflate && systemctl reload apache2
 ```
 
 **Harden SSL**
@@ -228,7 +228,7 @@ sed -i '/SSLProtocol/D' /etc/apache2/apache2.conf && sed -i '/SSLCipherSuite/D' 
 
 Restart Apache
 ```
-service apache2 restart
+systemctl restart apache2
 ```
 
 ## Virtualmin Post-Installation Wizard
@@ -364,7 +364,7 @@ SSLCACertificateFile /etc/ssl/snakeoil.pem
 EOF
 ```
 ```
-a2ensite 000-default && service apache2 restart
+a2ensite 000-default && systemctl reload apache2
 ```
 
 ## Finished – Reboot
@@ -373,3 +373,14 @@ This concludes the initial setup and configuration of you Virtualmin LAMP Server
 reboot
 ```
 
+## After you create your virtual website ##
+When creating a virtual website, Virtualmin will include SSL settings that will override the Hardened global SSL setting we created earlier. Let's remove any errent SSL settings.
+```
+sed -i '/SSLProtocol/D' /etc/apache2/sites-available/*
+```
+```
+sed -i '/SSLCipherSuite/D' /etc/apache2/sites-available/*
+```
+```
+systemctl reload apache2
+```
