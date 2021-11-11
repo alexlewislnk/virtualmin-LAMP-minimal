@@ -144,8 +144,6 @@ Header set X-XSS-Protection "1; mode=block"
 Header set X-Content-Type-Options nosniff
 EOF
 ```
-
-Enable mod_headers
 ```
 a2enmod headers && service apache2 restart
 ```
@@ -159,8 +157,6 @@ ExpiresDefault "access plus 1 week"
 </IfModule>
 EOF
 ```
-
-Enable mod_expires
 ```
 a2enmod expires && service apache2 restart
 ```
@@ -195,8 +191,6 @@ AddOutputFilterByType DEFLATE text/xml
 </IfModule>
 EOF
 ```
-
-Enable mod_deflate
 ```
 a2enmod deflate && service apache2 restart
 ```
