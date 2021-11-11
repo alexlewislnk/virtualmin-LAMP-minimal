@@ -132,9 +132,7 @@ Enable the PHP modules.
 phpenmod bcmath bz2 curl gd igbinary imagick mbstring memcached opcache readline redis xml zip
 ```
 
-**Apache Modifications**
-
-Customization of HTTP request and response headers
+** HTTP request and response headers **
 ```
 cat > /etc/apache2/conf-available/security.conf <<EOF
 ServerTokens Prod
@@ -147,12 +145,12 @@ Header set X-Content-Type-Options nosniff
 EOF
 ```
 
-Enable the mod_headers
+Enable mod_headers
 ```
 a2enmod headers && service apache2 restart
 ```
 
-Instruct browsers to allow cacheable content to be fetched from the browser’s cache for up to a week
+** Define browser caching **
 ```
 cat > /etc/apache2/mods-available/expires.conf <<EOF
 <IfModule mod_expires.c>
@@ -167,7 +165,7 @@ Enable mod_expires
 a2enmod expires && service apache2 restart
 ```
 
-Allow output from your server to be compressed before being sent to the browser
+** Enable Compression **
 ```
 cat > /etc/apache2/mods-available/deflate.conf <<EOF
 <IfModule mod_deflate.c>
@@ -203,7 +201,7 @@ Enable mod_deflate
 a2enmod deflate && service apache2 restart
 ```
 
-Harden SSL
+** Harden SSL **
 ```
 cp /etc/apache2/mods-available/ssl.conf /etc/apache2/mods-available/ssl.conf.save
 cat > /etc/apache2/mods-available/ssl.conf <<EOF
