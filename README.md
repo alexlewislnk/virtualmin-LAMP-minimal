@@ -196,6 +196,13 @@ a2enmod deflate && systemctl reload apache2
 ```
 
 **Harden SSL**
+
+Create Diffie-Hellman Key Pairs
+```
+openssl dhparam -out /etc/ssl/dhparam.pem 2048
+```
+
+Create New Apache SSL Config File
 ```
 cp /etc/apache2/mods-available/ssl.conf /etc/apache2/mods-available/ssl.conf.save
 cat > /etc/apache2/mods-available/ssl.conf <<EOF
@@ -265,10 +272,6 @@ systemctl mask proftpd
 
 **Harden Email Encryption**
 
-Create Diffie-Hellman Key Pairs
-```
-openssl dhparam -out /etc/ssl/dhparam.pem 2048
-```
 
 Create Initial Self-Signed Postfix Cert
 ```
