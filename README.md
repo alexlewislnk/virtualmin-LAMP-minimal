@@ -43,7 +43,7 @@ I like to locate the MySQL data under the /home directory so everything for Virt
 
 **Stop the MySQL service**
 ```
-service mysql stop
+systemctl stop mysql
 ```
 
 **Create new data directory**
@@ -76,7 +76,7 @@ mysqld --initialize-insecure
 
 **Start MySQL**
 ```
-service mysql start
+systemctl start mysql
 ```
 
 **Create SQL System Maintenance User** *(This will include a new longer random password for the maintenance user than normally provided by Ubuntu's setup)*
