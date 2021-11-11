@@ -132,7 +132,7 @@ Enable the PHP modules.
 phpenmod bcmath bz2 curl gd igbinary imagick mbstring memcached opcache readline redis xml zip
 ```
 
-** HTTP request and response headers **
+**HTTP request and response headers**
 ```
 cat > /etc/apache2/conf-available/security.conf <<EOF
 ServerTokens Prod
@@ -150,7 +150,7 @@ Enable mod_headers
 a2enmod headers && service apache2 restart
 ```
 
-** Define browser caching **
+**Define browser caching**
 ```
 cat > /etc/apache2/mods-available/expires.conf <<EOF
 <IfModule mod_expires.c>
@@ -165,7 +165,7 @@ Enable mod_expires
 a2enmod expires && service apache2 restart
 ```
 
-** Enable Compression **
+**Enable Compression**
 ```
 cat > /etc/apache2/mods-available/deflate.conf <<EOF
 <IfModule mod_deflate.c>
@@ -201,7 +201,7 @@ Enable mod_deflate
 a2enmod deflate && service apache2 restart
 ```
 
-** Harden SSL **
+**Harden SSL**
 ```
 cp /etc/apache2/mods-available/ssl.conf /etc/apache2/mods-available/ssl.conf.save
 cat > /etc/apache2/mods-available/ssl.conf <<EOF
