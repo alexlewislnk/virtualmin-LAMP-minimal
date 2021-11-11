@@ -244,10 +244,11 @@ From a web browser, log in to the Virtualmin console at port 10000, using the ro
 During the setup wizard, you will be prompted for the MySQL root password created earlier in this guide. 
 
 At the end of the Wizard, select the option to **Manage Enabled Features and Plugins**. These are the only features that should be enabled:
-- Nginx website
-- Nginx SSL website
+- Apache website
+- Apache SSL website
 - MySQL database
 - Log file rotation
+- Protected web directories
 
 Next, select **System Settings** on the left menu, then click on **Re-check Configuration**.
 
