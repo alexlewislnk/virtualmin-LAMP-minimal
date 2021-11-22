@@ -418,10 +418,6 @@ reboot
 When creating a virtual website, Virtualmin will include SSL settings that will override the Hardened global SSL setting we created earlier. Let's remove any errent SSL settings.
 ```
 sed -i '/SSLProtocol/D' /etc/apache2/sites-available/*
-```
-```
 sed -i '/SSLCipherSuite/D' /etc/apache2/sites-available/*
-```
-```
 systemctl reload apache2
 ```
