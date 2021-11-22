@@ -277,6 +277,20 @@ Select **System Settings** on the left menu, then click on **Re-check Configurat
 
 ## Final Tweaks
 
+**Enable http2**
+```
+a2disconf php7.4-fpm
+a2enconf php8.0-fpm
+a2dismod php7.4
+a2dismod php8.0
+a2dismod mpm_prefork
+a2enmod mpm_event
+sed -i '/php_value/D' /etc/apache2/sites-available/*
+sed -i '/php_admin_value/D' /etc/apache2/sites-available/*
+a2enmod http2
+systemctl restart apache2
+```
+
 **Disable Unnecessary Services**
 
 If you plan to host DNS elsewhere, disable Bind DNS
