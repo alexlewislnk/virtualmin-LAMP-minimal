@@ -241,7 +241,15 @@ systemctl restart apache2
 ## Virtualmin Post-Installation Wizard
 From a web browser, log in to the Virtualmin console at port 10000, using the root user credentials, and complete the Post-Installation Wizard. For the initial setup, you should use the server's IP address in the URL instead of FQDN (https://x.x.x.x:10000)
 
-During the setup wizard, you will be prompted for the MySQL root password created earlier in this guide. 
+During the setup wizard:
+- Preload Virtualmin libraries?  **No**
+- Run MySQL database server?  **Yes**
+- Run PostgreSQL database server?  **No**
+- Set MySQL password  **(Enter the MySQL root password created earlier in this guide)**
+- MySQL configuration size  **Leave default settings**
+- DNS Configuration  **Check box for Skip check for resolvability**
+- Setup default virtual server?  **No**
+- Enable SSL on default server?  **No**
 
 At the end of the Wizard, select the option to **Manage Enabled Features and Plugins**. These are the only features that should be enabled:
 - Apache website
@@ -250,7 +258,22 @@ At the end of the Wizard, select the option to **Manage Enabled Features and Plu
 - Log file rotation
 - Protected web directories
 
-Next, select **System Settings** on the left menu, then click on **Re-check Configuration**.
+Select **System Settings** on the left menu, then click on **Server Templates**. Click on **Default Settings**
+- Administration user
+  - Chroot jail new domain Unix users  **Yes**
+- MySQL database
+  - Chroot jail new domain Unix users  **Generate Randomly**
+- PHP options
+  - Default PHP exection mode  **FPM**
+  - Default PHP version  **7.4.x**
+
+Select **System Settings** on the left menu, then click on **Virtualmin Configuration**
+- Defaults for new domains
+  - Length of randomly generated password  **16**
+- SSL settings
+  - Redirect HTTP to HTTPS by default?  **Yes**
+
+Select **System Settings** on the left menu, then click on **Re-check Configuration**
 
 ## Final Tweaks
 
