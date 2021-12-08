@@ -217,10 +217,9 @@ SSLPassPhraseDialog exec:/usr/share/apache2/ask-for-passphrase
 SSLSessionCache         shmcb:${APACHE_RUN_DIR}/ssl_scache(512000)
 SSLSessionCacheTimeout  300
 SSLProtocol -All +TLSv1.2 +TLSv1.3
-SSLCipherSuite ECDHE+CHACHA20:ECDHE+AESGCM:DHE+AESGCM:+AES256:+DHE:!DSS
+SSLCipherSuite ECDH+CHACHA20:ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+AES128:ECDH+AES256:!aNULL:!SHA1:!AESCCM
 SSLCipherSuite TLSv1.3 TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384
 SSLHonorCipherOrder On
-SSLOpenSSLConfCmd DHParameters "/etc/ssl/dhparam.pem"
 SSLUseStapling on
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
