@@ -257,10 +257,10 @@ Select **System Settings** on the left menu, then click on **Server Templates**.
 - Administration user
   - Chroot jail new domain Unix users  **Yes**
 - MySQL database
-  - Chroot jail new domain Unix users  **Generate Randomly**
+  - MySQL password for new domains  **Generate Randomly**
 - PHP options
   - Default PHP exection mode  **FPM**
-  - Default PHP version  **7.4.x**
+  - Default PHP version  **8.0.x**
 
 Select **System Settings** on the left menu, then click on **Virtualmin Configuration**
 - Defaults for new domains
