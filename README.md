@@ -254,8 +254,6 @@ At the end of the Wizard, select the option to **Manage Enabled Features and Plu
 - Protected web directories
 
 Select **System Settings** on the left menu, then click on **Server Templates**. Click on **Default Settings**
-- Administration user
-  - Chroot jail new domain Unix users  **Yes**
 - MySQL database
   - MySQL password for new domains  **Generate Randomly**
 - PHP options
@@ -275,9 +273,11 @@ Select **System Settings** on the left menu, then click on **Re-check Configurat
 **Enable http2**
 ```
 a2disconf php7.4-fpm
+a2disconf php8.1-fpm
 a2enconf php8.0-fpm
 a2dismod php7.4
 a2dismod php8.0
+a2dismod php8.1
 a2dismod mpm_prefork
 a2enmod mpm_event
 sed -i '/php_value/D' /etc/apache2/sites-available/*
