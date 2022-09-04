@@ -285,7 +285,7 @@ Select **System Settings** on the left menu, then click on **Server Templates**.
 - Website for domain
   - Directive and settings for new websites (add the following line to bottom)
 ```
-IncludeOptional misc/*.conf**
+IncludeOptional misc/*.conf
 ```
 - MySQL database
   - MySQL password for new domains  **Generate Randomly**
