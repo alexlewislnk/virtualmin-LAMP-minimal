@@ -72,8 +72,7 @@ FileETag None
 Header set X-XSS-Protection "1; mode=block"
 Header set X-Content-Type-Options nosniff
 EOF
-a2enmod headers && systemctl reload apache2
-
+a2enmod headers && systemctl reload apache2  
 ```
 
 **Define browser caching**
