@@ -259,6 +259,7 @@ cat > /etc/apache2/misc/badbots.conf <<EOF
     RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
     RewriteRule . - [R=406,L]
 EOF
+```
 
 ## Virtualmin Post-Installation Wizard
 From a web browser, log in to the Virtualmin console at port 10000, using the root user credentials, and complete the Post-Installation Wizard. For the initial setup, you should use the server's IP address in the URL instead of FQDN (https://x.x.x.x:10000)
@@ -283,7 +284,9 @@ At the end of the Wizard, select the option to **Manage Enabled Features and Plu
 Select **System Settings** on the left menu, then click on **Server Templates**. Click on **Default Settings**
 - Website for domain
   - Directive and settings for new websites (add the following line to bottom)
-  **IncludeOptional misc/*.conf**
+```
+IncludeOptional misc/*.conf**
+```
 - MySQL database
   - MySQL password for new domains  **Generate Randomly**
 - PHP options
