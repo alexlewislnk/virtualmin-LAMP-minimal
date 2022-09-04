@@ -6,14 +6,16 @@ I suggest checking out my scripts for [Ubuntu Setup](https://github.com/alexlewi
 
 ## Install Virtualmin
 
-**Add repository for latest version of Nginx**
+**Add repository for latest version of Apache**
 ```
 add-apt-repository ppa:ondrej/apache2 && apt update -y
+
 ```
 
 **Add repository for latest version of PHP**
 ```
 add-apt-repository ppa:ondrej/php && apt update -y
+
 ```
 
 **Download the Virtualmin installation script**
@@ -21,21 +23,25 @@ add-apt-repository ppa:ondrej/php && apt update -y
 cd /tmp
 wget http://software.virtualmin.com/gpl/scripts/install.sh
 chmod +rx /tmp/install.sh
+
 ```
 
 **Run the install script**
 ```
 /tmp/install.sh --minimal
+
 ```
 
 **Configure Fail2Ban to work with the Firewall**
 ```
 virtualmin config-system --include Fail2banFirewalld
+
 ```
 
 **Make sure Fail2Ban is enabled and running**
 ```
 systemctl enable fail2ban ; systemctl restart fail2ban
+
 ```
 
 ## Apache and PHP Modifications
@@ -44,14 +50,17 @@ systemctl enable fail2ban ; systemctl restart fail2ban
 Install the current supported PHP versions (7.4, 8.0, 8.1) and common modules.
 ```
 apt -y install php{7.4,8.0,8.1}-{bcmath,bz2,cgi,cli,common,curl,fpm,gd,igbinary,imagick,intl,mbstring,memcached,mysql,opcache,readline,redis,xml,zip} 
+
 ```
 Ensure all other PHP versions are removed.
 ```
 apt -y purge php5.6* php7.0* php7.1* php7.2* php7.3*
+
 ```
 Enable the PHP modules.
 ```
 phpenmod bcmath bz2 curl gd igbinary imagick mbstring memcached opcache readline redis xml zip
+
 ```
 
 **HTTP request and response headers**
@@ -78,6 +87,7 @@ ExpiresDefault "access plus 1 week"
 </IfModule>
 EOF
 a2enmod expires && systemctl reload apache2
+
 ```
 
 **Enable Compression**
@@ -109,9 +119,8 @@ AddOutputFilterByType DEFLATE text/xml
 </IfModule>
 </IfModule>
 EOF
-```
-```
 a2enmod deflate && systemctl reload apache2
+
 ```
 
 **Harden SSL**
@@ -119,6 +128,7 @@ a2enmod deflate && systemctl reload apache2
 Create Diffie-Hellman Key Pairs
 ```
 openssl dhparam -out /etc/ssl/dhparam.pem 2048
+
 ```
 
 Create New Apache SSL Config File
@@ -144,16 +154,9 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 </IfModule>
 EOF
-```
-
-Remove any errant SSL settings
-```
 sed -i '/SSLProtocol/D' /etc/apache2/apache2.conf && sed -i '/SSLCipherSuite/D' /etc/apache2/apache2.conf
-```
-
-Restart Apache
-```
 systemctl restart apache2
+
 ```
 
 **Define Bots and Crawlers to Block in Apache**
@@ -182,6 +185,7 @@ cat > /etc/apache2/misc/badbots.conf <<EOF
     RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
     RewriteRule . - [R=406,L]
 EOF
+
 ```
 
 ## Virtualmin Post-Installation Wizard
@@ -240,6 +244,7 @@ sed -i '/php_value/D' /etc/apache2/sites-available/*
 sed -i '/php_admin_value/D' /etc/apache2/sites-available/*
 a2enmod http2
 systemctl restart apache2
+
 ```
 
 **Disable Unnecessary Services**
@@ -247,25 +252,28 @@ systemctl restart apache2
 If you plan to host DNS elsewhere, disable Bind DNS
 ```
 systemctl mask bind9
+
 ```
 
 If you plan to host email elsewhere, disable Dovecot Mail Server
 ```
 systemctl mask dovecot
+
 ```
 
 Disable Proftp server (I strongly encourage the use of ssh-based sftp instead of ftp/ftps)
 ```
 systemctl mask proftpd
+
 ```
 
 **Harden Email Encryption**
-
 
 Create Initial Self-Signed Postfix Cert
 ```
 touch ~/.rnd
 openssl req -new -x509 -nodes -out /etc/ssl/postfix.pem -keyout /etc/ssl/postfix.key -days 3650 -subj "/C=US/O=$HOSTNAME/OU=Email/CN=$HOSTNAME"
+
 ```
 
 Configure Email SSL/TLS
@@ -293,6 +301,7 @@ postconf -e smtp_tls_mandatory_ciphers=medium
 postconf -e smtp_tls_cert_file=/etc/ssl/postfix.pem
 postconf -e smtp_tls_key_file=/etc/ssl/postfix.key
 systemctl restart postfix
+
 ```
 
 Restrict Mail protocols
@@ -301,15 +310,18 @@ Since we are not using the Virtualmin’s mail services, then let’s lock down 
 ```
 postconf -e inet_interfaces=127.0.0.1
 systemctl restart postfix
+
 ```
 
 ## Setup Default Apache Site to Block IP URL Requests
 
 ```
 a2dissite 000-default
+
 ```
 ```
 openssl req -new -x509 -nodes -out /etc/ssl/snakeoil.pem -keyout /etc/ssl/snakeoil.key -days 3650 -subj '/CN=*'
+
 ```
 ```
 VirtualHost1=""
@@ -354,15 +366,15 @@ SSLCertificateKeyFile /etc/ssl/snakeoil.key
 SSLCACertificateFile /etc/ssl/snakeoil.pem
 </VirtualHost>
 EOF
-```
-```
 a2ensite 000-default && systemctl reload apache2
+
 ```
 
 ## Finished – Reboot
 This concludes the initial setup and configuration of you Virtualmin LAMP Server. Before creating your virtual webservers, reboot your server to make sure everything starts up correctly.
 ```
 reboot
+
 ```
 
 ## After you create your virtual website ##
@@ -371,4 +383,5 @@ When creating a virtual website, Virtualmin will include SSL settings that will 
 sed -i '/SSLProtocol/D' /etc/apache2/sites-available/*
 sed -i '/SSLCipherSuite/D' /etc/apache2/sites-available/*
 systemctl reload apache2
+
 ```
