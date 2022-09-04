@@ -8,14 +8,12 @@ I suggest checking out my scripts for [Ubuntu Setup](https://github.com/alexlewi
 
 **Add repository for latest version of Apache**
 ```
-add-apt-repository ppa:ondrej/apache2 && apt update -y
-
+add-apt-repository ppa:ondrej/apache2 && apt update -y  
 ```
 
 **Add repository for latest version of PHP**
 ```
-add-apt-repository ppa:ondrej/php && apt update -y
-
+add-apt-repository ppa:ondrej/php && apt update -y  
 ```
 
 **Download the Virtualmin installation script**
