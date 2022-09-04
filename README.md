@@ -65,9 +65,8 @@ FileETag None
 Header set X-XSS-Protection "1; mode=block"
 Header set X-Content-Type-Options nosniff
 EOF
-```
-```
 a2enmod headers && systemctl reload apache2
+
 ```
 
 **Define browser caching**
@@ -78,8 +77,6 @@ ExpiresActive On
 ExpiresDefault "access plus 1 week"
 </IfModule>
 EOF
-```
-```
 a2enmod expires && systemctl reload apache2
 ```
 
@@ -115,34 +112,6 @@ EOF
 ```
 ```
 a2enmod deflate && systemctl reload apache2
-```
-
-Define Bots and Crawlers to Block in Apache
-```
-mkdir -p /etc/apache2/misc
-cat > /etc/apache2/misc/badbots.conf <<EOF
-    RewriteEngine On
-    RewriteCond %{HTTP_USER_AGENT} ^.*ahrefsbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*aspiegelbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*baiduspider.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*blexbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*cloudfind.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*dotbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*go-http-client.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*mauibot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*mj12bot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*petalbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*project25499.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*proximic.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*pubmatic.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*qihu\ 360.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*screaming\\ frog.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*semrushbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*sogou.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*yandex.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
-    RewriteRule . - [R=406,L]
-EOF
 ```
 
 **Harden SSL**
@@ -185,6 +154,34 @@ sed -i '/SSLProtocol/D' /etc/apache2/apache2.conf && sed -i '/SSLCipherSuite/D' 
 Restart Apache
 ```
 systemctl restart apache2
+```
+
+**Define Bots and Crawlers to Block in Apache**
+```
+mkdir -p /etc/apache2/misc
+cat > /etc/apache2/misc/badbots.conf <<EOF
+    RewriteEngine On
+    RewriteCond %{HTTP_USER_AGENT} ^.*ahrefsbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*aspiegelbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*baiduspider.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*blexbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*cloudfind.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*dotbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*go-http-client.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mauibot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mj12bot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*petalbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*project25499.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*proximic.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*pubmatic.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*qihu\ 360.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*screaming\\ frog.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*semrushbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*sogou.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*yandex.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
+    RewriteRule . - [R=406,L]
+EOF
 ```
 
 ## Virtualmin Post-Installation Wizard
