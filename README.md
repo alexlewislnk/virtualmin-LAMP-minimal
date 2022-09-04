@@ -210,7 +210,7 @@ SSLRandomSeed connect file:/dev/urandom 512
 AddType application/x-x509-ca-cert .crt
 AddType application/x-pkcs7-crl .crl
 SSLPassPhraseDialog exec:/usr/share/apache2/ask-for-passphrase
-SSLSessionCache         shmcb:${APACHE_RUN_DIR}/ssl_scache(512000)
+SSLSessionCache         shmcb:\${APACHE_RUN_DIR}/ssl_scache(512000)
 SSLSessionCacheTimeout  300
 SSLProtocol -All +TLSv1.2 +TLSv1.3
 SSLCipherSuite ECDH+CHACHA20:ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+AES128:ECDH+AES256:!aNULL:!SHA1:!AESCCM
@@ -233,6 +233,33 @@ Restart Apache
 systemctl restart apache2
 ```
 
+Define Bots and Crawlers to Block in Apache
+```
+mkdir -p /etc/apache2/misc
+cat > /etc/apache2/misc/badbots.conf <<EOF
+    RewriteEngine On
+    RewriteCond %{HTTP_USER_AGENT} ^.*ahrefsbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*aspiegelbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*baiduspider.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*blexbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*cloudfind.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*dotbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*go-http-client.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mauibot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mj12bot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*petalbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*project25499.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*proximic.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*pubmatic.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*qihu\ 360.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*screaming\\ frog.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*semrushbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*sogou.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*yandex.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
+    RewriteRule . - [R=406,L]
+EOF
+
 ## Virtualmin Post-Installation Wizard
 From a web browser, log in to the Virtualmin console at port 10000, using the root user credentials, and complete the Post-Installation Wizard. For the initial setup, you should use the server's IP address in the URL instead of FQDN (https://x.x.x.x:10000)
 
@@ -254,6 +281,9 @@ At the end of the Wizard, select the option to **Manage Enabled Features and Plu
 - Protected web directories
 
 Select **System Settings** on the left menu, then click on **Server Templates**. Click on **Default Settings**
+- Website for domain
+  - Directive and settings for new websites (add the following line to bottom)
+  **IncludeOptional misc/*.conf**
 - MySQL database
   - MySQL password for new domains  **Generate Randomly**
 - PHP options
