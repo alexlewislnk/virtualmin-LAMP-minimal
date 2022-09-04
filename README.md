@@ -38,80 +38,6 @@ virtualmin config-system --include Fail2banFirewalld
 systemctl enable fail2ban ; systemctl restart fail2ban
 ```
 
-## Move MySQL Data Directory
-I like to locate the MySQL data under the /home directory so everything for Virtualmin is under a single path. This can be helpful if you later need to add disk space my moving /home to a separate drive.
-
-**Stop the MySQL service**
-```
-systemctl stop mysql
-```
-
-**Create new data directory**
-```
-mkdir /home/mysql
-chown mysql:mysql /home/mysql
-```
-
-**Define new data directory in MySQL config file**
-```
-cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.save
-```
-```
-sed -i '/datadir/d' /etc/mysql/mysql.conf.d/mysqld.cnf
-```
-```
-echo "datadir = /home/mysql" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-```
-
-**Update AppArmor**
-```
-echo "alias /var/lib/mysql/ -> /home/mysql/," >> /etc/apparmor.d/tunables/alias
-systemctl restart apparmor
-```
-
-**Initialize New Data Directory** *(don’t worry, we will add a password during the Virtualmin setup later)*
-```
-mysqld --initialize-insecure
-```
-
-**Start MySQL**
-```
-systemctl start mysql
-```
-
-**Create SQL System Maintenance User** *(This will include a new longer random password for the maintenance user than normally provided by Ubuntu's setup)*
-```
-RANDOM1=`< /dev/urandom tr -dc '[:alnum:]' | head -c${1:-64}`
-cp /etc/mysql/debian.cnf /etc/mysql/debian.cnf.bak
-cat > /etc/mysql/debian.cnf <<EOF
-# Automatically generated for Debian scripts. DO NOT TOUCH!
-[client]
-host     = localhost
-user     = debian-sys-maint
-password = $RANDOM1
-socket   = /var/run/mysqld/mysqld.sock
-[mysql_upgrade]
-host     = localhost
-user     = debian-sys-maint
-password = $RANDOM1
-socket   = /var/run/mysqld/mysqld.sock
-basedir  = /usr
-EOF
-echo "CREATE USER 'debian-sys-maint'@'localhost' IDENTIFIED BY '$RANDOM1';" | mysql -u root
-echo "GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost';" | mysql -u root
-echo "GRANT PROXY ON ''@'' TO 'debian-sys-maint'@'localhost' WITH GRANT OPTION;" | mysql -u root
-```
-
-**Create Random Password for MySQL root user**
-```
-RANDOM1=`< /dev/urandom tr -dc '[:alnum:]' | head -c${1:-32}`
-echo "ALTER USER 'root'@'localhost' IDENTIFIED BY '$RANDOM1';" | mysql -u root
-echo "
-MySQL root password has been set to $RANDOM1
-Please record password for use later in this setup 
-and save in your password manager."
-```
-
 ## Apache and PHP Modifications
 **PHP Versions and Modules**
 
@@ -191,6 +117,34 @@ EOF
 a2enmod deflate && systemctl reload apache2
 ```
 
+Define Bots and Crawlers to Block in Apache
+```
+mkdir -p /etc/apache2/misc
+cat > /etc/apache2/misc/badbots.conf <<EOF
+    RewriteEngine On
+    RewriteCond %{HTTP_USER_AGENT} ^.*ahrefsbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*aspiegelbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*baiduspider.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*blexbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*cloudfind.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*dotbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*go-http-client.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mauibot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mj12bot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*petalbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*project25499.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*proximic.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*pubmatic.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*qihu\ 360.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*screaming\\ frog.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*semrushbot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*sogou.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*yandex.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
+    RewriteRule . - [R=406,L]
+EOF
+```
+
 **Harden SSL**
 
 Create Diffie-Hellman Key Pairs
@@ -231,34 +185,6 @@ sed -i '/SSLProtocol/D' /etc/apache2/apache2.conf && sed -i '/SSLCipherSuite/D' 
 Restart Apache
 ```
 systemctl restart apache2
-```
-
-Define Bots and Crawlers to Block in Apache
-```
-mkdir -p /etc/apache2/misc
-cat > /etc/apache2/misc/badbots.conf <<EOF
-    RewriteEngine On
-    RewriteCond %{HTTP_USER_AGENT} ^.*ahrefsbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*aspiegelbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*baiduspider.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*blexbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*cloudfind.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*dotbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*go-http-client.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*mauibot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*mj12bot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*petalbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*project25499.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*proximic.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*pubmatic.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*qihu\ 360.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*screaming\\ frog.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*semrushbot.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*sogou.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*yandex.* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*yisouspider.* [NC]
-    RewriteRule . - [R=406,L]
-EOF
 ```
 
 ## Virtualmin Post-Installation Wizard
