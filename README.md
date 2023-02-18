@@ -218,11 +218,14 @@ Select **System Settings** on the left menu, then click on **Re-check Configurat
 
 **Set Mysql Logging to 10 days**
 ```
+if [ -f /etc/mysql/mysql.conf.d/mysqld.cnf ]; then
 cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.backup
 sed -i '/binlog_expire_logs_seconds/D' /etc/mysql/mysql.conf.d/mysqld.cnf
 cat >> /etc/mysql/mysql.conf.d/mysqld.cnf <<EOF
 binlog_expire_logs_seconds = 864000
 EOF
+fi
+
 ```
 
 **Enable http2**
