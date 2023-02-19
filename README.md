@@ -41,11 +41,11 @@ systemctl enable fail2ban ; systemctl restart fail2ban
 ## Apache and PHP Modifications
 **PHP Versions and Modules**
 
-Install the current supported PHP versions (7.4, 8.0, 8.1) and common modules.
+Install php and commond modules for the current supported PHP versions (8.0, 8.1, 8.2) and legacy version 7.4.
 ```
-apt -y install php{7.4,8.0,8.1}-{bcmath,bz2,cgi,cli,common,curl,fpm,gd,igbinary,imagick,intl,mbstring,memcached,mysql,opcache,readline,redis,xml,zip} 
+apt -y install php{7.4,8.0,8.1,8.2}-{bcmath,bz2,cgi,cli,common,curl,fpm,gd,igbinary,imagick,intl,mbstring,memcached,mysql,opcache,readline,redis,xml,zip} 
 ```
-Ensure all other PHP versions are removed.
+Ensure all other PHP legacy versions are removed.
 ```
 apt -y purge php5.6* php7.0* php7.1* php7.2* php7.3*
 ```
