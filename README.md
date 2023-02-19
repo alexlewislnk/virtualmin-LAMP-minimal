@@ -205,7 +205,7 @@ Select **System Settings** on the left menu, then click on **Server Templates**.
   - MySQL password for new domains  **Generate Randomly**
 - PHP options
   - Default PHP exection mode  **FPM**
-  - Default PHP version  **8.0.x**
+  - Default PHP version  **8.1.x**
 
 Select **System Settings** on the left menu, then click on **Virtualmin Configuration**
 - Defaults for new domains
