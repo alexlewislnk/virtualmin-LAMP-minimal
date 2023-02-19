@@ -199,8 +199,8 @@ Select **System Settings** on the left menu, then click on **Server Templates**.
 ```
 IncludeOptional misc/*.conf
 ```
-  - Enable HTTP2 protocol for new websites **Yes**
-  - Redirect HTTP to HTTPS by default?  **Yes**
+    - Enable HTTP2 protocol for new websites **Yes**
+    - Redirect HTTP to HTTPS by default?  **Yes**
 - MySQL database
   - MySQL password for new domains  **Generate Randomly**
 - PHP options
