@@ -196,11 +196,11 @@ At the end of the Wizard, select the option to **Manage Enabled Features and Plu
 Select **System Settings** on the left menu, then click on **Server Templates**. Click on **Default Settings**
 - Website for domain
   - Directive and settings for new websites (add the following line to bottom)
-```
-IncludeOptional misc/*.conf
-```
-    - Enable HTTP2 protocol for new websites **Yes**
-    - Redirect HTTP to HTTPS by default?  **Yes**
+  ```
+  IncludeOptional misc/*.conf
+  ```
+  - Enable HTTP2 protocol for new websites **Yes**
+  - Redirect HTTP to HTTPS by default?  **Yes**
 - MySQL database
   - MySQL password for new domains  **Generate Randomly**
 - PHP options
