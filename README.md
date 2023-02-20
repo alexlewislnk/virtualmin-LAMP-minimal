@@ -4,7 +4,7 @@ General instructions for install and setup. The minimal installation excludes th
 This assumes you have already completed the basic setup of your Ubuntu 20.04 LTS Server. 
 I suggest checking out my scripts for [Ubuntu Setup](https://github.com/alexlewislnk/Ubuntu-Setup) and [Emerging Threats Firewall](https://github.com/alexlewislnk/ET-Firewalld).
 
-## Install Virtualmin
+## Virtualmin Installation
 
 **Add repository for latest version of Apache**
 ```
@@ -23,14 +23,20 @@ wget http://software.virtualmin.com/gpl/scripts/install.sh
 chmod +rx /tmp/install.sh
 ```
 
-**Run the install script**
+**Install Virtualmin**
 ```
 /tmp/install.sh --minimal
 ```
 
-**Configure Fail2Ban to work with the Firewall**
+**Make sure all packages are up-to-date**
 ```
-virtualmin config-system --include Fail2banFirewalld
+export DEBIAN_FRONTEND=noninteractive
+apt update && apt -y full-upgrade
+```
+
+**Install Fail2Ban and enable in Virtualmin**
+```
+apt -y install fail2ban && virtualmin config-system --include Fail2banFirewalld
 ```
 
 **Make sure Fail2Ban is enabled and running**
@@ -39,7 +45,7 @@ systemctl enable fail2ban ; systemctl restart fail2ban
 ```
 
 ## Apache and PHP Modifications
-**PHP Versions and Modules**
+**PHP versions and modules**
 
 Install php and common modules for the current supported versions (8.0, 8.1, 8.2) and popular legacy version 7.4.
 ```
@@ -79,7 +85,7 @@ EOF
 a2enmod expires && systemctl reload apache2
 ```
 
-**Enable Compression**
+**Enable http compression**
 ```
 cat > /etc/apache2/mods-available/deflate.conf <<EOF
 <IfModule mod_deflate.c>
@@ -113,12 +119,12 @@ a2enmod deflate && systemctl reload apache2
 
 **Harden SSL**
 
-Create Diffie-Hellman Key Pairs
+Create Diffie-Hellman key pairs
 ```
 openssl dhparam -out /etc/ssl/dhparam.pem 2048
 ```
 
-Create New Apache SSL Config File
+Create new Apache SSL config file
 ```
 cp /etc/apache2/mods-available/ssl.conf /etc/apache2/mods-available/ssl.conf.save
 cat > /etc/apache2/mods-available/ssl.conf <<EOF
@@ -145,7 +151,7 @@ sed -i '/SSLProtocol/D' /etc/apache2/apache2.conf && sed -i '/SSLCipherSuite/D' 
 systemctl restart apache2
 ```
 
-**Define Bots and Crawlers to Block in Apache**
+**Define bots and crawlers to block in Apache**
 ```
 mkdir -p /etc/apache2/misc
 cat > /etc/apache2/misc/badbots.conf <<EOF
@@ -215,7 +221,7 @@ Select **System Settings** on the left menu, then click on **Re-check Configurat
 
 ## Final Tweaks
 
-**Set Mysql Logging to 10 days**
+**Set MariaDB/Mysql logging to 10 days**
 ```
 if [ -f /etc/mysql/mysql.conf.d/mysqld.cnf ]; then
 cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.backup
@@ -224,9 +230,16 @@ cat >> /etc/mysql/mysql.conf.d/mysqld.cnf <<EOF
 binlog_expire_logs_seconds = 864000
 EOF
 fi
+if [ -f /etc/mysql/mariadb.conf.d/50-server.cnf ]; then
+cp /etc/mysql/mariadb.conf.d/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf.backup
+sed -i '/binlog_expire_logs_seconds/D' /etc/mysql/mariadb.conf.d/50-server.cnf
+cat >> /etc/mysql/mariadb.conf.d/50-server.cnf <<EOF
+binlog_expire_logs_seconds = 864000
+EOF
+fi
 ```
 
-**Disable Unnecessary Services**
+**Disable unnecessary services**
 
 If you plan to host DNS elsewhere, disable Bind DNS
 ```
@@ -243,16 +256,16 @@ Disable Proftp server (I strongly encourage the use of ssh-based sftp instead of
 systemctl mask proftpd
 ```
 
-**Harden Email Encryption**
+**Harden email encryption**
 
-Create Initial Self-Signed Postfix Cert
+Create default self-signed cert for Postfix
 ```
 touch ~/.rnd
 openssl req -new -x509 -nodes -out /etc/ssl/postfix.pem -keyout /etc/ssl/postfix.key -days 3650 -subj "/C=US/O=$HOSTNAME/OU=Email/CN=$HOSTNAME"
 
 ```
 
-Configure Email SSL/TLS
+Configure Postfix SSL/TLS
 ```
 postconf -e tls_medium_cipherlist=ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES128:ECDH+AES:DHE+AES128:DHE+AES:RSA+AESGCM+AES128:RSA+AESGCM:\!aNULL:\!SHA1:\!DSS
 postconf -e tls_preempt_cipherlist=yes
@@ -279,7 +292,7 @@ postconf -e smtp_tls_key_file=/etc/ssl/postfix.key
 systemctl restart postfix
 ```
 
-Restrict Mail protocols
+Restrict inbound email
 
 Since we are not using the Virtualmin’s mail services, then let’s lock down the Postfix SMTP server so it cannot be an attack target. We cannot disable it completely as it will be needed to send outbound email from your server. We configure it so connections are only accepted from the server itself.
 ```
@@ -343,8 +356,8 @@ This concludes the initial setup and configuration of you Virtualmin LAMP Server
 reboot
 ```
 
-## After you create your virtual website ##
-When creating a virtual website, Virtualmin will include SSL settings that will override the Hardened global SSL setting we created earlier. Let's remove any errent SSL settings.
+## After Creating a Virtual Website ##
+When creating a virtual website, Virtualmin will include SSL settings that will override the hardened global SSL setting we created earlier. Let's remove any errent SSL settings.
 ```
 sed -i '/SSLProtocol/D' /etc/apache2/sites-available/*
 sed -i '/SSLCipherSuite/D' /etc/apache2/sites-available/*
