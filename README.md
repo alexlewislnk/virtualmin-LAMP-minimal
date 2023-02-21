@@ -184,18 +184,17 @@ From a web browser, log in to the Virtualmin console at port 10000, using the ro
 
 During the setup wizard:
 - Preload Virtualmin libraries?  **No**
-- Run MySQL database server?  **Yes**
+- Run MariaDB/MySQL database server?  **Yes**
 - Run PostgreSQL database server?  **No**
-- Set MySQL password  **(Enter the MySQL root password created earlier in this guide)**
-- MySQL configuration size  **Leave default settings**
+- Set MariaDB/MySQL password  **(Enter a long random password or use the one suggested)**
 - DNS Configuration  **Check box for Skip check for resolvability**
+- MariaDB/MySQL configuration size  **Leave default settings**
 - Setup default virtual server?  **No**
-- Enable SSL on default server?  **No**
 
 At the end of the Wizard, select the option to **Manage Enabled Features and Plugins**. These are the only features that should be enabled:
 - Apache website
 - Apache SSL website
-- MySQL database
+- MariaDB/MySQL database
 - Log file rotation
 - Protected web directories
 
