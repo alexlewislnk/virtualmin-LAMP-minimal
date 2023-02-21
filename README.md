@@ -206,8 +206,8 @@ Select **System Settings** on the left menu, then click on **Server Templates**.
   ```
   - Enable HTTP2 protocol for new websites **Yes**
   - Redirect HTTP to HTTPS by default?  **Yes**
-- MySQL database
-  - MySQL password for new domains  **Generate Randomly**
+- MariaDB/MySQL database
+  - MariaDB/MySQL password for new domains  **Generate Randomly**
 - PHP options
   - Default PHP exection mode  **FPM**
   - Default PHP version  **8.1.x**
