@@ -44,6 +44,35 @@ apt -y install fail2ban && virtualmin config-system --include Fail2banFirewalld
 systemctl enable fail2ban ; systemctl restart fail2ban
 ```
 
+## Move MariaDB Data Directory
+Stop the MySQL Service
+```
+systemctl stop mysql
+```
+
+Create the new directory
+```
+mkdir /home/mysql
+chown mysql:mysql /home/mysql
+chmod 750 /home/mysql
+```
+
+Modify MySQL config file
+```
+sed -i '/datadir/D' /etc/mysql/mariadb.conf.d/50-server.cnf
+sed -i '/basedir/a\datadir = /home/mysql' /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+
+Initialize New Data Directory
+```
+mysqld --initialize-insecure
+```
+
+Start MySQL
+```
+systemctl start mysql
+```
+
 ## Apache and PHP Modifications
 **PHP versions and modules**
 
