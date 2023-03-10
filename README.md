@@ -65,7 +65,7 @@ sed -i '/basedir/a\datadir = /home/mysql' /etc/mysql/mariadb.conf.d/50-server.cn
 
 Initialize New Data Directory
 ```
-mysqld --initialize-insecure
+mysql_install_db
 ```
 
 Start MySQL
