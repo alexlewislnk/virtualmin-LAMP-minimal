@@ -47,30 +47,30 @@ systemctl enable fail2ban ; systemctl restart fail2ban
 ## Move MariaDB Data Directory
 Stop the MySQL Service
 ```
-systemctl stop mysql
+systemctl stop mariadb
 ```
 
 Create the new directory
 ```
-mkdir /home/mysql
-chown mysql:mysql /home/mysql
-chmod 750 /home/mysql
+mkdir /mysql
+chown mysql:mysql /mysql
+chmod 750 /mysql
 ```
 
 Modify MySQL config file
 ```
 sed -i '/datadir/D' /etc/mysql/mariadb.conf.d/50-server.cnf
-sed -i '/basedir/a\datadir = /home/mysql' /etc/mysql/mariadb.conf.d/50-server.cnf
+sed -i '/basedir/a\datadir = /mysql' /etc/mysql/mariadb.conf.d/50-server.cnf
 ```
 
 Initialize New Data Directory
 ```
-mysql_install_db --user=mysql
+mysql_install_db --user=mysql --skip-test-db
 ```
 
 Start MySQL
 ```
-systemctl start mysql
+systemctl start mariadb
 ```
 
 ## Apache and PHP Modifications
