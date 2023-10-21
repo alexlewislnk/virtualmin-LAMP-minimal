@@ -295,7 +295,8 @@ openssl req -new -x509 -nodes -out /etc/ssl/postfix.pem -keyout /etc/ssl/postfix
 
 Configure Postfix SSL/TLS
 ```
-postconf -e tls_medium_cipherlist=ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES128:ECDH+AES:DHE+AES128:DHE+AES:RSA+AESGCM+AES128:RSA+AESGCM:\!aNULL:\!SHA1:\!DSS
+postconf -e smtpd_banner="\$myhostname ESMTP \$mail_name"
+postconf -e tls_medium_cipherlist=ECDH+CHACHA20:ECDH+AESGCM+AES128:ECDH+AESGCM:ECDH+AES128:ECDH+AES256:\!aNULL:\!SHA1:\!AESCCM
 postconf -e tls_preempt_cipherlist=yes
 postconf -e smtpd_use_tls=yes
 postconf -e smtpd_tls_loglevel=1
