@@ -193,6 +193,7 @@ cat > /etc/apache2/misc/badbots.conf <<EOF
     RewriteCond %{HTTP_USER_AGENT} ^.*dotbot.* [NC,OR]
     RewriteCond %{HTTP_USER_AGENT} ^.*go-http-client.* [NC,OR]
     RewriteCond %{HTTP_USER_AGENT} ^.*mauibot.* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*mozlila.* [NC,OR]
     RewriteCond %{HTTP_USER_AGENT} ^.*mj12bot.* [NC,OR]
     RewriteCond %{HTTP_USER_AGENT} ^.*petalbot.* [NC,OR]
     RewriteCond %{HTTP_USER_AGENT} ^.*project25499.* [NC,OR]
