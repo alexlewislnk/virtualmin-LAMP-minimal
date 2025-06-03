@@ -78,7 +78,7 @@ systemctl start mariadb
 
 Install php and common modules for the current supported versions (8.0, 8.1, 8.2) and popular legacy version 7.4.
 ```
-apt -y install php{7.4,8.0,8.1,8.2}-{bcmath,bz2,cgi,cli,common,curl,fpm,gd,igbinary,imagick,intl,mbstring,memcached,mysql,opcache,readline,redis,xml,zip} 
+apt -y install php{7.4,8.2,8.3,8.4}-{bcmath,bz2,cgi,cli,common,curl,fpm,gd,igbinary,imagick,intl,mbstring,memcached,mysql,opcache,readline,redis,xml,zip} 
 ```
 Ensure all other PHP legacy versions are removed.
 ```
